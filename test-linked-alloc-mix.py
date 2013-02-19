@@ -6,21 +6,16 @@ if call(["ln", "-sf", "test-in1.txt", "cardrd.dev"]) != 0:
         print "Unable to set up input"
         exit(1)
 
-# Build app
-if call(["make", "mix-linked_alloc"]) != 0:
+# Run app
+if call(["make", "run-mix-linked_alloc"]) != 0:
         print "FAIL"
         print "Unable to build app"
         exit(1)
 
-# Run app
-if call(["./mix-linked_alloc"]) != 0:
-        print "FAIL"
-        print "Unable to run app"
-        exit(1)
-
 # Compare output with expected
 # TODO: Make this into a function
-out = Popen(["diff", "out1.txt", "out1.txt"], stdout=PIPE).communicate()[0]
+# TODO: Figure out how to run mixvm against local "devices"
+out = Popen(["diff", "out1.txt", "/home/rjose/.mdk/printer.dev"], stdout=PIPE).communicate()[0]
 
 if out != '':
         print "FAIL"
