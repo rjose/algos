@@ -1,0 +1,93 @@
+* Stack example
+
+INFO    EQU     0:3
+LINK    EQU     4:5
+NUMW    EQU     100
+
+DATA    ORIG    *+NUMW
+SEQMIN  ORIG    *+1
+
+* Global data
+AVAIL   CON     NUMW
+Y       CON     0
+T       CON     0
+X       CON     0
+
+
+* Set up linked data
+START   ENT2    NUMW
+2H      ENT3    0,2
+        DEC2    1
+        J2N     4F
+        ST2     0,3(LINK)
+        JMP     2B
+
+4H      ENT1    NUMW
+
+* Insert items on stack
+        ENTA    1234
+        STA     Y
+        JMP     INSERT
+
+        ENTA    1111
+        STA     Y
+        JMP     INSERT
+
+        ENTA    1235
+        STA     Y
+        JMP     INSERT
+
+* Pop item off stack
+        JMP     DELETE
+        JMP     DELETE
+        JMP     DELETE
+        JMP     DELETE
+        NOP
+
+* Push new item onto stack
+
+        JMP     DONE
+
+* Subroutines
+
+INSERT  STJ     6F 
+
+        LD1     AVAIL           Allocate slot
+        J1Z     OVERFLOW
+
+        LDA     0,1(LINK)       Point AVAIL to next slot
+        STA     AVAIL
+
+        LDA     Y               Write Y into allocated slot 
+        STA     0,1(INFO)
+
+        LDA     T               Point new node to old top of stack T
+        STA     0,1(LINK)
+
+        ST1     T               Make new node the top of stack
+6H      JMP     *
+
+
+DELETE  STJ     6F
+        LD1     T
+        J1Z     UNDERFLOW       If the top of the stack is NULL, nothing's left to delete
+        LDA     0,1(LINK)       Get the next item on the stack
+        STA     T               Make that item the new top of the stack
+        LDA     0,1(INFO)       Get the data from the previous top of stack
+        STA     X               Store data in X
+        LDA     AVAIL           Get address of next available memory
+        STA     0,1(LINK)       Link the freshly deleted node to the AVAIL memory
+        ST1     AVAIL           Make the freshly deleted node, the new AVAIL
+6H      JMP     *
+
+* Overflow/underflow
+OVERFLOW        STJ     6F
+6H              JMP     *
+
+UNDERFLOW       STJ     6F
+                NOP
+6H              JMP     *
+
+DONE    HLT
+        END     START
+        
