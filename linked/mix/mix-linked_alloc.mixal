@@ -1,0 +1,95 @@
+* Constants
+L0              EQU     0
+SEQMIN          EQU     2000
+MAXWORDS        EQU     500
+
+* Devices
+PRINTER         EQU     18              Line printer
+CARDRD          EQU     16              Card reader
+
+* TODO: Data for linked allocation
+
+* Sequential data
+DATA            ORIG    *+MAXWORDS
+SLIME           ORIG    *+MAXWORDS
+SEQDATA         ORIG    *+MAXWORDS
+
+* Other data
+NBYTES          ORIG    *
+
+* Start of program
+                ORIG    3000
+START           IOC     0(PRINTER)      Advance to top of next page
+
+* Read input from card reader
+                IN      DATA(CARDRD)
+                JBUS    *(CARDRD)
+
+* Write words from card reader to SEQDATA by bytes (instead of words)
+                ENT1    SEQDATA
+                JMP     B2W
+                ST4     NBYTES
+
+* Allocate data
+                ENT1    SLIME
+                LD4     NBYTES
+                JMP     ALLOC
+
+                HLT
+
+* Writes non zero bytes to words
+* r4 has the number of non-zero bytes written
+B2W             STJ     EXIT2
+                ENT2    0
+                ENT3    0
+                ENT4    0
+
+2H              LDX     DATA,3
+                CMPX    =0=
+                JNE     4F
+                INC2    1
+                CMP2    =2=
+                JE      EXIT2
+                JMP     2B
+
+4H              JMP     WWORD
+                INC3    1
+                JMP     2B
+EXIT2           JMP     *
+
+* Writes a word byte-by-byte into sequential words
+WWORD           STJ     EXIT1
+                ENT5    0
+
+2H              ENTA    0
+                SLAX    1
+                CMPA    =0=
+                JE      4F
+
+                STA     0,1
+                INC1    1
+                INC4    1
+
+4H              CMP5    =5=
+                INC5    1
+                JL      2B
+EXIT1           JMP     *
+
+* TODO: Implement data allocation routine
+ALLOC           STJ     EXIT3
+                ENT2    0
+                ENT3    0
+2H              CMP4    =0=
+                JE      EXIT3
+
+* TODO: Allocation scheme is here
+                MOVE    SEQDATA,3
+                INC3    1
+                DEC4    1
+                JMP     2B
+
+EXIT3           JMP     *
+* 
+* * TODO: Walk data and write to printer
+* 
+                END     START
