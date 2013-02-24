@@ -2,3 +2,7 @@
 cardrd.dev
 *.mix
 *.core
+*.o
+*.s
+*.lst
+stack
