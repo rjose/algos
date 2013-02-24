@@ -33,6 +33,10 @@ _start:
         call    popval
         add     esp, 4
 
+        push    byte 0x11       ; arg to pushval
+        call    pushval
+        add     esp, 4          ; 'pop' arg to pushval
+
         ; Exit
         push    dword 0
         sys.exit
@@ -65,7 +69,7 @@ popval:
         pop     ebx             ; Store return address
 
         ; P <- T
-        movzx   eax, byte [top]
+        movzx   eax, byte [top]         ; eax holds the offset into linkmem of the top of the stack
         ; TODO: Check for underflow
 
         ; T <- LINK(P)
@@ -80,11 +84,10 @@ popval:
         push    edx
 
         ; AVAIL <= P
-;        mov     edx, [avail]
-        mov     ecx, linkmem
-        movzx   edx, byte [eax+1]   ; The second byte contains the offset into the next avail memory
-        add     ecx, edx            ; ecx now points to the new avail memory
-        mov     [avail], ecx        ; |avail| now points to the next avail memory
+        mov     edx, [avail]    ; Store offset of avail into LINK(P)
+        sub     edx, linkmem
+        mov     [ecx+1], byte edx
+        mov     [avail], ecx    ; Point avail to P
 
         push    ebx             ; Push return address back onto stack
         ret
