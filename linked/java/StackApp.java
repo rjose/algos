@@ -16,6 +16,10 @@ class MemNode {
                 value = val;
         }
 
+        public int getValue() {
+                return value;
+        }
+
         public MemNode nextNode() {
                 return link;
         }
@@ -71,6 +75,23 @@ class Stack {
                 memManager = mgr;
                 top = null;
         }
+
+        public void push(int val) {
+                MemNode node = memManager.allocateNode();
+                node.setValue(val);
+                node.setLink(top);
+                top = node;
+        }
+
+        public int pop() throws Exception {
+                if (top == null)
+                        throw new Exception("Underflow");
+                int result = top.getValue();
+                MemNode p = top;
+                top = p.nextNode();
+                p.free();
+                return result;
+        }
 }
 
 public class StackApp {
@@ -78,14 +99,14 @@ public class StackApp {
         public static void main(String[] args) {
                 System.out.println("Howdy, Java!");
                 MemManager memmgr = new MemManager();
-                MemNode n1 = memmgr.allocateNode();
-                MemNode n2 = memmgr.allocateNode();
-
+                Stack stack = new Stack(memmgr);
+                stack.push(111);
+                stack.push(222);
                 try {
-                        n1.free();
+                        int value = stack.pop();
                 }
                 catch (Exception e) {
-                        System.out.println("Unable to free");
+                        System.out.println("pop");
                 }
         }
 }
