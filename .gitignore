@@ -6,3 +6,4 @@ cardrd.dev
 *.s
 *.lst
 stack
+*.class
